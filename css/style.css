@@ -1590,7 +1590,7 @@ span.border.two:after {
 	ul.nav1 {
 		display: none;
 		margin-top: 2em;
-		    background: rgba(27, 26, 26, 0.98);
+		    background: var(--secondary-color);
 	}
 	.navigation-right {
 		margin: 0.7em 0 0;
@@ -1861,6 +1861,7 @@ span.border.two:after {
 		margin: 2em auto 0;
 	}
 }
+
 @media(max-width:384px){
 	ul.year li {
 		margin-top: 10px;
@@ -2012,7 +2013,7 @@ span.border.two:after {
   .theme-switch {
 	display: inline-block;
 	height: 34px;
-	position: fixed;
+	position: absolute;
 	width: 60px;
   }
   

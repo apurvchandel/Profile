@@ -1,7 +1,4 @@
-/*
-* 	Owl Carousel Owl Demo Theme 
-*	v1.24
-*/
+
     #owl-demo .item{
         margin: 3px;
     }
@@ -9,8 +6,6 @@
         display: block;
         height: auto;
     }
-
-/* Styling Next and Prev buttons */
 
 .owl-theme .owl-controls .owl-buttons div{
 	color: #FFF;
