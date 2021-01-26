@@ -2571,10 +2571,15 @@ body {
 
 .bg-default {
   background-color: #888 !important; }
+.bg-project {
+background-color: #edde34 !important;
+}
 
 .bg-primary {
   background-color: #000 !important; }
-
+.bg-education {
+  background-color: #d73925 !important;
+}
 .bg-info {
   background-color: #2CA8FF !important; }
 
