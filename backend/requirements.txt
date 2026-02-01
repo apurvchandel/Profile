@@ -1,4 +1,0 @@
-pypdf==4.2.0
-flask
-flask-cors
-gunicorn
