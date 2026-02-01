@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pdf-unlocker-backend
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    autoDeploy: true
+    rootDir: .
