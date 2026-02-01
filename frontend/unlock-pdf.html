@@ -23,7 +23,7 @@
     <form id="unlockForm" enctype="multipart/form-data">
       <div class="form-group">
         <label for="pdfFile">Locked PDF File</label>
-        <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf" required>
+        <input type="file" id="pdfFile" name="file" accept="application/pdf" required>
       </div>
       <div class="form-group">
         <label for="password">Password (if any)</label>
@@ -41,7 +41,7 @@
       document.getElementById('result').innerHTML = 'Processing...';
       try {
         // Update this URL after deploying backend to Render
-        const res = await fetch('https://YOUR-RENDER-URL.onrender.com/unlock', {
+        const res = await fetch('https://profile-zwmp.onrender.com/unlock', {
           method: 'POST',
           body: data
         });
@@ -56,11 +56,15 @@
           document.getElementById('result').innerHTML = '';
           document.getElementById('result').appendChild(a);
         } else {
-          const err = await res.text();
-          document.getElementById('result').textContent = 'Error: ' + err;
+          let errMsg = await res.text();
+          try {
+            const json = JSON.parse(errMsg);
+            if (json.error) errMsg = json.error;
+          } catch (_) {}
+          document.getElementById('result').textContent = 'Error: ' + errMsg;
         }
       } catch (err) {
-        document.getElementById('result').textContent = 'Error: ' + err;
+        document.getElementById('result').textContent = 'Error: ' + (err.message || String(err));
       }
     });
   </script>

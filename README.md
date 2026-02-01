@@ -9,6 +9,7 @@ Profile/
 ├── backend/         # Flask backend (for Render)
 │   ├── app.py
 │   ├── main.py
+│   ├── README.md
 │   ├── requirements.txt
 │   └── render.yaml
 ├── frontend/        # Static frontend (for GitHub Pages)
@@ -26,12 +27,12 @@ Profile/
 
 ## Frontend Deployment (GitHub Pages)
 - The `frontend/` folder is deployed automatically to GitHub Pages using the workflow in `.github/workflows/gh-pages.yml`.
-- On every push to `main`, the workflow uploads the contents of `frontend/` to GitHub Pages.
+- On every push to `master` (or `main`), the workflow uploads the contents of `frontend/` to GitHub Pages.
 - Your site will be available at: `https://<username>.github.io/<repo>/`
 
 ### To trigger a deploy:
 1. Make any change in the repo (e.g., edit a file in `frontend/`).
-2. Commit and push to `main`.
+2. Commit and push to `master`.
 3. The workflow will run and deploy your site.
 
 ## Backend Deployment (Render)
@@ -43,7 +44,7 @@ Profile/
 2. Go to [Render](https://render.com), create a new Web Service, and connect your repo.
 3. Set the root directory to `backend/`.
 4. Set the build command: `pip install -r requirements.txt`
-5. Set the start command: `python app.py`
+5. Set the start command: `gunicorn -b 0.0.0.0:$PORT app:app`
 6. Deploy and get your backend URL.
 
 ## Frontend/Backend Integration
