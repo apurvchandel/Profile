@@ -1,3 +1,14 @@
+/* Rich violet gradient for experience card left panel */
+.experience-card-left {
+  background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%) !important;
+  color: #fff !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100%;
+}
 
 
 .bootstrap-switch {
@@ -2573,13 +2584,15 @@ body {
 .bg-default {
   background-color: #888 !important; }
 .bg-project {
-background-color: #edde34 !important;
+background: linear-gradient(135deg, #ffb347 0%, #ff5e62 100%) !important;
+color: #fff !important;
 }
 
 .bg-primary {
   background-color: #000 !important; }
 .bg-education {
-  background-color: #d73925 !important;
+  background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%) !important;
+  color: #fff !important;
 }
 .bg-experience{
   background-color: rgb(37, 206, 183) !important;
