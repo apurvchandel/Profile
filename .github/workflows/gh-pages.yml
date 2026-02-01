@@ -3,12 +3,15 @@ name: Deploy frontend to GitHub Pages
 on:
   push:
     branches:
-      - main
       - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
