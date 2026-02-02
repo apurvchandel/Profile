@@ -513,16 +513,48 @@
             </div>
 
             <div class="form-group">
-                <div class="slider-header">
-                    <label for="quality">Compression Quality</label>
-                    <span class="slider-value" id="qualityValue">75</span>
+                <label style="margin-bottom: 12px;">Compression Mode</label>
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                        <input type="radio" name="compressionMode" value="quality" checked style="cursor: pointer;">
+                        <span style="color: var(--text); font-size: 0.9rem;">Quality-based</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                        <input type="radio" name="compressionMode" value="targetSize" style="cursor: pointer;">
+                        <span style="color: var(--text); font-size: 0.9rem;">Target Size</span>
+                    </label>
                 </div>
-                <div class="slider-wrap">
-                    <input type="range" id="quality" name="quality" min="1" max="95" value="75"
-                        aria-label="Quality slider">
-                    <div class="quality-labels">
-                        <span>Smaller file</span>
-                        <span>Better quality</span>
+
+                <!-- Quality-based compression -->
+                <div id="qualityMode">
+                    <div class="slider-header">
+                        <label for="quality">Compression Quality</label>
+                        <span class="slider-value" id="qualityValue">75</span>
+                    </div>
+                    <div class="slider-wrap">
+                        <input type="range" id="quality" name="quality" min="1" max="95" value="75"
+                            aria-label="Quality slider">
+                        <div class="quality-labels">
+                            <span>Smaller file</span>
+                            <span>Better quality</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target size compression -->
+                <div id="targetSizeMode" style="display: none;">
+                    <label for="targetSize" style="margin-bottom: 8px;">Target File Size</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number" id="targetSize" name="targetSize" min="1" placeholder="e.g., 500"
+                            style="flex: 1; padding: 14px 16px; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; font-family: inherit;">
+                        <select id="targetSizeUnit" name="targetSizeUnit"
+                            style="padding: 14px 16px; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; font-family: inherit; cursor: pointer;">
+                            <option value="KB">KB</option>
+                            <option value="MB" selected>MB</option>
+                        </select>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">
+                        💡 The system will adjust quality to reach your target size
                     </div>
                 </div>
             </div>
@@ -548,6 +580,24 @@
         const resultEl = document.getElementById('result');
         const qualitySlider = document.getElementById('quality');
         const qualityValue = document.getElementById('qualityValue');
+        const compressionModeRadios = document.querySelectorAll('input[name="compressionMode"]');
+        const qualityMode = document.getElementById('qualityMode');
+        const targetSizeMode = document.getElementById('targetSizeMode');
+        const targetSizeInput = document.getElementById('targetSize');
+        const targetSizeUnit = document.getElementById('targetSizeUnit');
+
+        // Toggle between compression modes
+        compressionModeRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.value === 'quality') {
+                    qualityMode.style.display = 'block';
+                    targetSizeMode.style.display = 'none';
+                } else {
+                    qualityMode.style.display = 'none';
+                    targetSizeMode.style.display = 'block';
+                }
+            });
+        });
 
         qualitySlider.addEventListener('input', function () {
             qualityValue.textContent = this.value;
@@ -594,10 +644,44 @@
             document.getElementById('tryAgain').onclick = () => { resultEl.innerHTML = ''; };
         }
 
-        function showSuccess(filename) {
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function showSuccess(filename, stats) {
             if (lastDownloadUrl) window.URL.revokeObjectURL(lastDownloadUrl);
             lastDownloadUrl = window.URL.createObjectURL(blobForDownload);
-            resultEl.innerHTML = '<div class="result-success"><span class="message">File compressed successfully</span><a href="#" class="btn-download" id="downloadLink" download="' + filename + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download compressed file</a><div class="try-again"><button type="button" id="tryAgain">Compress another</button></div></div>';
+
+            let statsHtml = '';
+            if (stats && stats.originalSize && stats.compressedSize) {
+                const savedBytes = stats.originalSize - stats.compressedSize;
+                const savedPercent = stats.compressionRatio || ((savedBytes / stats.originalSize) * 100).toFixed(2);
+
+                statsHtml = `
+                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 16px; margin: 12px 0; text-align: left;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem;">
+                            <div>
+                                <div style="color: var(--text-muted); margin-bottom: 4px;">Original Size</div>
+                                <div style="color: var(--text); font-weight: 600;">${formatBytes(stats.originalSize)}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted); margin-bottom: 4px;">Compressed Size</div>
+                                <div style="color: var(--text); font-weight: 600;">${formatBytes(stats.compressedSize)}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.2);">
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;">Space Saved</div>
+                            <div style="color: var(--success); font-weight: 700; font-size: 1.1rem;">${savedPercent}% (${formatBytes(savedBytes)})</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultEl.innerHTML = `<div class="result-success"><span class="message">File compressed successfully</span>${statsHtml}<a href="#" class="btn-download" id="downloadLink" download="${filename}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download compressed file</a><div class="try-again"><button type="button" id="tryAgain">Compress another</button></div></div>`;
             document.getElementById('downloadLink').href = lastDownloadUrl;
             document.getElementById('tryAgain').onclick = () => { if (lastDownloadUrl) { window.URL.revokeObjectURL(lastDownloadUrl); lastDownloadUrl = null; } resultEl.innerHTML = ''; setFileLabel(''); fileInput.value = ''; submitBtn.disabled = true; };
         }
@@ -607,8 +691,32 @@
 
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
-            const data = new FormData(form);
+
+            // Get selected compression mode
+            const selectedMode = document.querySelector('input[name="compressionMode"]:checked').value;
+
+            // Create FormData and add file
+            const data = new FormData();
             const file = fileInput.files[0];
+            data.append('file', file);
+
+            // Add compression parameters based on mode
+            if (selectedMode === 'quality') {
+                data.append('quality', qualitySlider.value);
+            } else {
+                // Target size mode
+                const targetSize = targetSizeInput.value;
+                const unit = targetSizeUnit.value;
+
+                if (!targetSize || targetSize <= 0) {
+                    showError('Please enter a valid target file size');
+                    return;
+                }
+
+                data.append('targetSize', targetSize);
+                data.append('targetSizeUnit', unit);
+            }
+
             const ext = file.name.split('.').pop().toLowerCase();
             const filename = ext === 'pdf' ? 'compressed.pdf' : 'compressed_image.' + ext;
 
@@ -620,7 +728,15 @@
 
                 if (res.ok) {
                     blobForDownload = await res.blob();
-                    showSuccess(filename);
+
+                    // Extract compression statistics from response headers
+                    const stats = {
+                        originalSize: parseInt(res.headers.get('X-Original-Size')) || 0,
+                        compressedSize: parseInt(res.headers.get('X-Compressed-Size')) || 0,
+                        compressionRatio: parseFloat(res.headers.get('X-Compression-Ratio')) || 0
+                    };
+
+                    showSuccess(filename, stats);
                 } else {
                     const text = await res.text();
                     let errMsg = 'Request failed';
