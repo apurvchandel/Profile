@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compress File | Apurv Chandel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-elevated: #181822;
+            --border: rgba(142, 45, 226, 0.2);
+            --border-bright: rgba(142, 45, 226, 0.4);
+            --accent: #8e2de2;
+            --accent-end: #4a00e0;
+            --accent-glow: rgba(142, 45, 226, 0.35);
+            --accent-soft: rgba(142, 45, 226, 0.08);
+            --text: #f0eef5;
+            --text-muted: #8b8798;
+            --success: #22c55e;
+            --error: #ef4444;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+            --shadow-glow: 0 20px 60px rgba(142, 45, 226, 0.15);
+            --transition: 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            background-image:
+                radial-gradient(ellipse 100% 60% at 50% -30%, rgba(142, 45, 226, 0.18), transparent 50%),
+                radial-gradient(ellipse 70% 50% at 100% 0%, rgba(74, 0, 224, 0.12), transparent 45%),
+                radial-gradient(ellipse 60% 40% at 0% 100%, rgba(74, 0, 224, 0.08), transparent 45%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #0d0d14 100%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            transition: color var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            padding: 6px 12px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(142, 45, 226, 0.25);
+            border-radius: 100px;
+        }
+
+        .badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--accent), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 10px;
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-tools {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tools a {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+        }
+
+        .nav-tools a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .nav-tools a.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 32px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card:hover {
+            border-color: var(--border-bright);
+            box-shadow: var(--shadow), var(--shadow-glow);
+        }
+
+        .card:focus-within {
+            border-color: rgba(142, 45, 226, 0.5);
+            box-shadow: 0 0 0 1px rgba(142, 45, 226, 0.15), var(--shadow-glow);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 30px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition);
+            margin-bottom: 24px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .drop-zone.has-file {
+            border-style: solid;
+            border-color: var(--border-bright);
+            background: var(--accent-soft);
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .drop-zone-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            color: var(--text-muted);
+            transition: color var(--transition);
+        }
+
+        .drop-zone:hover .drop-zone-icon,
+        .drop-zone.has-file .drop-zone-icon {
+            color: var(--accent);
+        }
+
+        .drop-zone-text {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .drop-zone.has-file .drop-zone-text {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .drop-zone-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .slider-wrap {
+            position: relative;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-value {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-end));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(142, 45, 226, 0.4);
+            transition: transform var(--transition);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-end));
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(142, 45, 226, 0.4);
+            transition: transform var(--transition);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .quality-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-end));
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px rgba(142, 45, 226, 0.3);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-submit svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .result {
+            margin-top: 24px;
+            min-height: 48px;
+            text-align: center;
+        }
+
+        .result-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-error {
+            color: var(--error);
+            font-size: 0.9rem;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius-sm);
+        }
+
+        .result-success {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-success .message {
+            color: var(--success);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-end));
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-download svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .try-again {
+            margin-top: 12px;
+        }
+
+        .try-again button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color var(--transition);
+        }
+
+        .try-again button:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header">
+        <a href="index.html" class="back-link" aria-label="Back to profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to profile
+        </a>
+        <span class="badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Reduce file size
+        </span>
+        <h1>Compress File</h1>
+        <p>Reduce the size of your PDF or image files</p>
+    </div>
+
+    <div class="nav-tools">
+        <a href="unlock-pdf.html">Unlock PDF</a>
+        <a href="add-password.html">Add Password</a>
+        <a href="image-to-pdf.html">Image to PDF</a>
+        <a href="compress-file.html" class="active">Compress File</a>
+    </div>
+
+    <div class="card">
+        <form id="compressForm" enctype="multipart/form-data">
+            <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload file">
+                <input type="file" id="fileInput" name="file"
+                    accept="application/pdf,image/jpeg,image/jpg,image/png,image/gif" required
+                    aria-describedby="dropHint">
+                <div class="drop-zone-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                </div>
+                <span class="drop-zone-text" id="dropZoneText">Click or drag a file here</span>
+                <span class="drop-zone-sub" id="dropHint">Accepts PDF and images (JPEG, PNG, GIF)</span>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label for="quality">Compression Quality</label>
+                    <span class="slider-value" id="qualityValue">75</span>
+                </div>
+                <div class="slider-wrap">
+                    <input type="range" id="quality" name="quality" min="1" max="95" value="75"
+                        aria-label="Quality slider">
+                    <div class="quality-labels">
+                        <span>Smaller file</span>
+                        <span>Better quality</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                </svg>
+                Compress File
+            </button>
+        </form>
+
+        <div class="result" id="result" aria-live="polite"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://profile-zwmp.onrender.com/compress_file';
+        const form = document.getElementById('compressForm');
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const dropZoneText = document.getElementById('dropZoneText');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultEl = document.getElementById('result');
+        const qualitySlider = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+
+        qualitySlider.addEventListener('input', function () {
+            qualityValue.textContent = this.value;
+        });
+
+        function setFileLabel(name) {
+            dropZone.classList.toggle('has-file', !!name);
+            dropZoneText.textContent = name ? name : 'Click or drag a file here';
+            submitBtn.disabled = !name;
+        }
+
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            setFileLabel(file ? file.name : '');
+        });
+
+        dropZone.addEventListener('click', (e) => { if (!e.target.closest('input')) fileInput.click(); });
+        dropZone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+
+        ['dragenter', 'dragover'].forEach(ev => {
+            dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(ev => {
+            dropZone.addEventListener(ev, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (ev === 'drop' && e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (file && validTypes.includes(file.type)) {
+                        fileInput.files = e.dataTransfer.files;
+                        setFileLabel(file.name);
+                    }
+                }
+            });
+        });
+
+        function showLoading() {
+            resultEl.innerHTML = '<div class="result-loading"><div class="spinner" aria-hidden="true"></div><span>Compressing file…</span></div>';
+        }
+
+        function showError(msg) {
+            resultEl.innerHTML = '<div class="result-error">' + (msg || 'Something went wrong. Please try again.') + '</div><div class="try-again"><button type="button" id="tryAgain">Try again</button></div>';
+            document.getElementById('tryAgain').onclick = () => { resultEl.innerHTML = ''; };
+        }
+
+        function showSuccess(filename) {
+            if (lastDownloadUrl) window.URL.revokeObjectURL(lastDownloadUrl);
+            lastDownloadUrl = window.URL.createObjectURL(blobForDownload);
+            resultEl.innerHTML = '<div class="result-success"><span class="message">File compressed successfully</span><a href="#" class="btn-download" id="downloadLink" download="' + filename + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download compressed file</a><div class="try-again"><button type="button" id="tryAgain">Compress another</button></div></div>';
+            document.getElementById('downloadLink').href = lastDownloadUrl;
+            document.getElementById('tryAgain').onclick = () => { if (lastDownloadUrl) { window.URL.revokeObjectURL(lastDownloadUrl); lastDownloadUrl = null; } resultEl.innerHTML = ''; setFileLabel(''); fileInput.value = ''; submitBtn.disabled = true; };
+        }
+
+        let blobForDownload = null;
+        let lastDownloadUrl = null;
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const data = new FormData(form);
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop().toLowerCase();
+            const filename = ext === 'pdf' ? 'compressed.pdf' : 'compressed_image.' + ext;
+
+            showLoading();
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: data });
+
+                if (res.ok) {
+                    blobForDownload = await res.blob();
+                    showSuccess(filename);
+                } else {
+                    const text = await res.text();
+                    let errMsg = 'Request failed';
+                    try {
+                        const json = JSON.parse(text);
+                        errMsg = json.error || json.message || text;
+                    } catch (_) {
+                        errMsg = text || errMsg;
+                    }
+                    showError(errMsg);
+                }
+            } catch (err) {
+                showError(err.message || 'Network error. Check your connection.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
